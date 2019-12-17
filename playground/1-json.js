@@ -21,9 +21,9 @@ const fs = require('fs')
 // 3. Stringify the changed object and overwrite the original data
 // 4. Test your work by viewing data in the JSON file
 
-const dataBuffer = fs.readFileSync('1-json.json')
-const dataJSON = dataBuffer.toString()
-const user = JSON.parse(dataJSON)
+const dataBuffer = fs.readFileSync('1-json.json') // returns binary data
+const dataJSON = dataBuffer.toString() // stringyfies the binary data
+const user = JSON.parse(dataJSON) // transforms JSON string in a JS object
 
 user.name = 'Patricia'
 user.age = 26
