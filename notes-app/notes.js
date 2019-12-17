@@ -1,4 +1,5 @@
 const fs = require('fs')
+const chalk = require('chalk')
 
 const getNotes = function() {
    return 'Your notes...' 
@@ -24,14 +25,25 @@ const addNote = function (title, body) {
          body: body
       })
       saveNotes(notes)
-      console.log('New note added')
+      console.log(chalk.green.bold.inverse('New note added successfully!'))
    } else {
-      console.log('Note title taken!')
+      console.log(chalk.red.bold.inverse('Note title taken!'))
    }
 }
 
+// Challenge Wire up removeNote
+// 1. Load existing notes
+// 2. Use array filter method to remove the matching note (if any)
+// 3. Save the newly created array
+// 4. Test your work with a title that exists and a title that does not exist
+
 const removeNote = function(title) {
-   console.log(title)   
+   const notes = loadNotes()
+   const notesToKeep = notes.filter(function(note) {
+      return note.title !== title 
+   })
+   saveNotes(notesToKeep)
+   console.log(chalk.green.bold.inverse('Notes saved successfully!'))
 }
 
 const saveNotes = function(notes) {
