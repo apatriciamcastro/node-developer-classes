@@ -70,12 +70,19 @@ yargs.command({
     }
 })
 
+// Challenge: Wire up list command
+// 1. Create and export listNotes from note.js
+// - "Your notes" using chalk
+// - Print note title for each note
+// 2. Call listNotes from command handler
+// 3. Test your work
+
 //Create list command
 yargs.command({
     command: 'list',
     describe: 'List the notes',
     handler: () => {
-        console.log('Listing the notes...')
+       notes.listNotes()
     }
 })
 
