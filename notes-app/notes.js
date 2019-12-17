@@ -1,5 +1,56 @@
+const fs = require('fs')
+
 const getNotes = function() {
    return 'Your notes...' 
 }
 
-module.exports = getNotes
+const addNote = function (title, body) {
+   const notes = loadNotes()
+   /**
+    * Array method to check for duplicate notes (filter)
+    * If it returns true, filter keeps that note in the new array, calling it duplicate
+    * If it returns false, filter does not keep that note
+    * So as we don't want to type out a booleans explicitly, so we use a conditional logic:
+    * we check if the title of the note on the array equals the title of the new note
+    * 
+    */
+   const duplicateNotes = notes.filter(function(note) {
+      return note.title === title
+   })
+
+   if(duplicateNotes.length === 0) {
+      notes.push({
+         title: title,
+         body: body
+      })
+      saveNotes(notes)
+      console.log('New note added')
+   } else {
+      console.log('Note title taken!')
+   }
+}
+
+const removeNote = function(title) {
+   console.log(title)   
+}
+
+const saveNotes = function(notes) {
+   const dataJSON = JSON.stringify(notes)
+   fs.writeFileSync('notes.json', dataJSON)
+}
+
+const loadNotes = function() {
+   try {
+      const dataBuffer = fs.readFileSync('notes.json')
+      const dataJSON = dataBuffer.toString()
+      return JSON.parse(dataJSON)
+   } catch (e) {
+     return []
+   }
+}
+
+module.exports = {
+   getNotes: getNotes,
+   addNote: addNote,
+   removeNote: removeNote
+}
