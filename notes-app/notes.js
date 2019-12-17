@@ -37,13 +37,22 @@ const addNote = function (title, body) {
 // 3. Save the newly created array
 // 4. Test your work with a title that exists and a title that does not exist
 
+// Challenge: Use chalk to provide useful logs for remove
+// 1. If a note is removed, print "Note removed!" with a green background
+// 2. If no note is removed, print "No note found!" with a red background
+
 const removeNote = function(title) {
    const notes = loadNotes()
    const notesToKeep = notes.filter(function(note) {
       return note.title !== title 
    })
-   saveNotes(notesToKeep)
-   console.log(chalk.green.bold.inverse('Notes saved successfully!'))
+   if(notes.length > notesToKeep.length) {
+      saveNotes(notesToKeep)
+      console.log(chalk.green.bold.inverse('Note removed successfully!'))
+   } else {
+      console.log(chalk.red.bold.inverse('No note with that title was found!'))
+   }
+  
 }
 
 const saveNotes = function(notes) {
