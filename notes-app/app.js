@@ -61,12 +61,28 @@ yargs.command({
 // 2. Setup command to support list command (placeholder message)
 // 3. Test your work by running both commands and ensure correct output
 
+// Challenge: Wire up read command
+// 1. Setup --title option for read command
+// 2. Create readNote in notes.js
+// - Search for note by title
+// - Find note and print title (styled) and body (plain)
+// - No note found? Print error in bundleRenderer.renderToStream
+// 3. Have the command handler call the function
+// 4. Test your work by running a couple commands
+
 // Create read command
 yargs.command({
     command: 'read',
     describe: 'Read a note',
-    handler() {
-        console.log('Reading the note...')
+    builder: {
+        title: {
+            describe: 'Note title',
+            demandOption: true,
+            type: 'string'
+        }
+    },
+    handler(argv) {
+        notes.readNote(argv.title)
     }
 })
 
