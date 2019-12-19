@@ -20,6 +20,18 @@ app.get('/about', (req, res) => {
     } )
 })
 
+// Goal: Create a template for help page
+// 1. Setup a help template to render a help message to the screen
+// 2. Setup the help route and render the template with an example message
+// 3. Visit the route in the browser and see your help message print
+
+app.get('/help', (req, res) => {
+    res.render('help', {
+        title: 'Help Page',
+        message: 'For help info, please contact system admin.'
+    })
+})
+
 app.get('/weather', (req, res) => {
     res.send({
         forecast: 'Rain',
@@ -31,7 +43,3 @@ app.listen(3000, () => {
     console.log('Server is up on port 3000')
 })
 
-// Goal: Create a template for help page
-// 1. Setup a help route and render the template with an example message
-// 2. Setup the help route and render the template with an example message
-// 3. Visit the route in the browser and see your help message print
