@@ -7,14 +7,22 @@ const app = express()
  * to get the resource at a specific URL 
  */
 
+
 // app.com
 app.get('', (req,res) => {
-    res.send('Hello Express')
+    res.send('<h1>Weather</h1>')
 })
 
 // app.com/help
 app.get('/help', (req, res) => {
-    res.send('Help Page')
+    res.send([{
+        name: 'Ana',
+        age: 27
+    },
+    {
+        name:'Vitor',
+        age: 28
+    }])
 })
 
 // Goal: Setup two new routes
