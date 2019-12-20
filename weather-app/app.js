@@ -6,12 +6,12 @@ const forecast = require('./utils/forecast.js')
 // 2. Use property shorthand in forecast.js and geocode.js
 // 3. Test your work and ensure app still works
 
-const search = process.argv[2]
+const address = process.argv[2]
 
-if(!search) {
+if(!address) {
     console.log('Please provide a location.')
 } else {
-    geocode(search, (error, { latitude, longitude, location }) => {
+    geocode(address, (error, { latitude, longitude, location }) => {
         if(error) {
            return console.log(error)
         } else if(location) {
@@ -19,7 +19,7 @@ if(!search) {
                 if(error) {
                     return console.log(error)
                 }
-                search === location
+                address === location
                 console.log(location)
                 console.log(forecastData)
           })
