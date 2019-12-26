@@ -1,13 +1,22 @@
 console.log('Client side JS')
 
-// Goal: Fetch weather
-// 1. Setup a call to fetch weather for Porto, Portugal
-// 2. Get the parse JSON response
-//  - If error property, print error
-//  - If no error property, print location and forecast
-// 3. Refresh the browser and test your work
 
-fetch('http://localhost:3000/weather?address=porto,portugal').then((response) => {
+
+const weatherForm = document.querySelector('form')
+const search = document.querySelector('input')
+
+// Goal: use input value to get weather
+// 1. Migrate fecth call into the submit callback
+// 2. Use the search text as the address query string value
+// 3. Submit the form with a valid and invalid value to test
+
+weatherForm.addEventListener('submit', (event) => {
+    // to prevent the default behavior of the form: update the whole page
+    event.preventDefault()
+
+    const location = search.value
+
+    fetch('http://localhost:3000/weather?address=' + location).then((response) => {
     response.json().then((data) => {
         if(data.error){
             console.log(data.error)
@@ -17,3 +26,5 @@ fetch('http://localhost:3000/weather?address=porto,portugal').then((response) =>
         }
     })
 })
+})
+
