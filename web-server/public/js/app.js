@@ -8,7 +8,7 @@ const messageTwo = document.querySelector('#message-2')
 // 2. Just before fetch, render loading message and empty p
 // 3. If error, render error
 // 4. If no error, render location and forecast
-// 5. Test your work: search for errors and for valid locations
+// 5. Test your work: search for errors and fsshor valid locations
 
 weatherForm.addEventListener('submit', (event) => {
     event.preventDefault()
@@ -18,7 +18,7 @@ weatherForm.addEventListener('submit', (event) => {
     messageOne.textContent = 'Loading weather information...'
     messageTwo.textContent = ' '
 
-    fetch('http://localhost:3000/weather?address=' + location).then((response) => {
+    fetch('/weather?address=' + location).then((response) => {
     response.json().then((data) => {
         if(data.error){
             messageOne.textContent = data.error
