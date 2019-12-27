@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const validator = require('validator')
 
 
 mongoose.connect('mongodb://127.0.0.1:27017/task-manager-api', {
@@ -6,33 +7,67 @@ mongoose.connect('mongodb://127.0.0.1:27017/task-manager-api', {
     useCreateIndex: true
 })
 
+// Goal: Add a password field to user
+// 1. Setup the field as a required string
+// 2. Ensure the length is greater than 6
+// 3. Trim the password
+// 4. Ensure that password does not contain "password"
+// 5. Test your work
+
 const User = mongoose.model('User', {
     name: {
-        type: String
+        type: String,
+        required: true,
+        trim: true
+    },
+    email: {
+        type: String,
+        required: true,
+        trim: true,
+        lowercase: true,
+        validate(value){
+            if(!validator.isEmail(value)){
+                throw new Error('Email is invalid')
+            }
+        }
+    },
+    password: {
+        type: String,
+        required: true,
+        minlength: 7,
+        trim: true,
+        validate(value) {
+            if(value.toLowerCase.includes('password')) {
+                throw new Error('Password cannot contain "password"')
+            }
+        }
 
     },
     age: {
-        type: Number
+        type: Number,
+        default: 0,
+        validate(value) {
+            if(value < 0) {
+                throw new Error('Age must be a positive number.')
+            }
+
+        }
     }
 })
 
-// const me = new User({
-//     name: 'Patricia',
-//     age: 27
-// })
+const me = new User({
+    name: '   Pat  ',
+    email: 'MYMAIL@pat.com   ',
+    password: 'passpass    '
+})
 
-// me.save().then(() => {
-//     console.log(me)
+me.save().then(() => {
+    console.log(me)
 
-// }).catch((error) => {
-//     console.log('Error!', error)
-// })
+}).catch((error) => {
+    console.log('Error!', error)
+})
 
-// Goal: Create a model for tasks
-// 1. Define the model with description and completed fields
-// 2. Create a new instance of the model
-// 3. Save the model to the database
-// 4. Test your work
 
 const Task = mongoose.model('Task', {
     description:{
@@ -43,13 +78,13 @@ const Task = mongoose.model('Task', {
     }
 })
 
-const dishes = new Task ({
-    description: 'Wash the dishes',
-    completed: false
-})
+// const dishes = new Task ({
+//     description: 'Wash the dishes',
+//     completed: false
+// })
 
-dishes.save().then(() => {
-    console.log(dishes)
-}).catch((error) => {
-    console.log('Error!', error)
-})
+// dishes.save().then(() => {
+//     console.log(dishes)
+// }).catch((error) => {
+//     console.log('Error!', error)
+// })
