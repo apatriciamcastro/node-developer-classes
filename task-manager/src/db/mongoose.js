@@ -7,13 +7,6 @@ mongoose.connect('mongodb://127.0.0.1:27017/task-manager-api', {
     useCreateIndex: true
 })
 
-// Goal: Add a password field to user
-// 1. Setup the field as a required string
-// 2. Ensure the length is greater than 6
-// 3. Trim the password
-// 4. Ensure that password does not contain "password"
-// 5. Test your work
-
 const User = mongoose.model('User', {
     name: {
         type: String,
@@ -55,36 +48,43 @@ const User = mongoose.model('User', {
     }
 })
 
-const me = new User({
-    name: '   Pat  ',
-    email: 'MYMAIL@pat.com   ',
-    password: 'passpass    '
-})
-
-me.save().then(() => {
-    console.log(me)
-
-}).catch((error) => {
-    console.log('Error!', error)
-})
-
-
-const Task = mongoose.model('Task', {
-    description:{
-        type: String
-    },
-    completed: {
-        type: Boolean
-    }
-})
-
-// const dishes = new Task ({
-//     description: 'Wash the dishes',
-//     completed: false
+// const me = new User({
+//     name: '   Pat  ',
+//     email: 'MYMAIL@pat.com   ',
+//     password: 'passpass    '
 // })
 
-// dishes.save().then(() => {
-//     console.log(dishes)
+// me.save().then(() => {
+//     console.log(me)
+
 // }).catch((error) => {
 //     console.log('Error!', error)
 // })
+
+
+// Goal: Add validation and sanitization to task
+// 1. Trim the description and make it required
+// 2. Make completed optional and default it to false
+// 3. Test your work with and without errors
+
+const Task = mongoose.model('Task', {
+    description:{
+        type: String,
+        trim: true,
+        required: true
+    },
+    completed: {
+        type: Boolean,
+        default: false
+    }
+})
+
+const dishes = new Task ({
+    description: ' Wash the dishes   '
+})
+
+dishes.save().then(() => {
+    console.log(dishes)
+}).catch((error) => {
+    console.log('Error!', error)
+})
