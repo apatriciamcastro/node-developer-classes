@@ -1,10 +1,8 @@
 const express = require('express')
 const User = require('../models/user')
 
-// create a new router so you can separate the different routes in separate files
 const router = new express.Router()
 
-// setup the routes 
 router.post('/users', async (request, response) => {
     const user = new User(request.body)
 
@@ -54,7 +52,11 @@ router.patch('/users/:id', async(request, response) => {
     }
 
     try {
-        const user = await User.findByIdAndUpdate(_id, request.body, { new: true, runValidators: true })
+        const user = await User.findById(_id)
+        
+        updates.forEach((update) => user[update] = request.body[update])
+        await user.save()
+        
         if(!user) {
             return response.status(404).send()
         }

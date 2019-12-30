@@ -3,12 +3,6 @@ const Task = require('../models/task')
 
 const router = new express.Router()
 
-// Goal: Create task router
-// 1. Create new file that creates/exports new router
-// 2. Move all the task routes over
-// 3. Load in and use that router with the express app 
-// 4. Test your work
-
 router.post('/tasks', async (request, response) => {
     const task = new Task(request.body)
 
@@ -43,6 +37,12 @@ router.get('/tasks/:id', async (request, response) => {
     }
 })
 
+// Goal: Change how tasks are updated
+// 1. Find the task
+// 2. Alter the task properties
+// 3. Save the task
+// 4. Test by updating a task from Postman
+
 router.patch('/tasks/:id', async (request, response) => {
     const _id = request.params.id
 
@@ -56,7 +56,10 @@ router.patch('/tasks/:id', async (request, response) => {
     }
 
     try {
-        const task = await Task.findByIdAndUpdate(_id, request.body, { new: true, runValidators: true})
+        const task = await Task.findById(_id)
+
+        updates.forEach((update) => task[update] = request.body[update])
+        await task.save()
 
         if(!task) {
             return response.status(404).send()
