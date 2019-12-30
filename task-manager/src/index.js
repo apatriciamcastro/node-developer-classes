@@ -14,71 +14,79 @@ const port = process.env.PORT || 3000
 */
 app.use(express.json())
 
-app.post('/users', (request, response) => {
+app.post('/users', async (request, response) => {
     const user = new User(request.body)
 
-    user.save().then(() => {
+    try {
+        await user.save()
         response.status(201).send(user)
-    }).catch((error) => {
+    } catch (error) {
         response.status(400).send(error)
 
-    })
+    }
 })
 
-app.get('/users', (request, response) => {
-    User.find({}).then((users) => {
-        response.send(users)
-    }).catch((error) => {
+app.get('/users', async (request, response) => {
+   try {
+       const users = await User.find({})
+       response.send(users)
+    } catch(error) {
         response.status(500).send()
-    })   
+    }  
 })
 
-app.get('/users/:id', (request, response) => {
-    const _id = request.params.id
+app.get('/users/:id', async (request, response) => {
+    const _id = request.params.id    
 
-    User.findById(_id).then((user) => {
-        if(!user) {
-            return response.status(404).send()
+    try {
+        const user = await User.findById(_id)
+
+        if(!user){
+          return response.status(404).send()
         }
         response.send(user)
-    }).catch((error) => {
+    } catch(error) {
         response.status(500).send()
-    })   
+    }
 })
 
-app.post('/tasks', (request, response) => {
+// Goal: Refactor task routes to use async/await
+// 1. Refactor task routes to use async/await
+// 2. Test all routes in Postman
+
+
+app.post('/tasks', async (request, response) => {
     const task = new Task(request.body)
 
-    task.save().then(() => {
+    try {
+        await task.save()
         response.status(201).send(task)
-    }).catch((error) => {
+    } catch(error) {
         response.status(400).send(error)
-    })
+    }
 })
 
-// Goal: Setup the task reading endpoints
-// 1. Create an endpoint for fetching all tasks
-// 2. Create an endpoint for fetching a task by its id
-// 3. Setup new requests in Postman and test your work
-
-app.get('/tasks', (request, response) => {
-    Task.find({}).then((tasks) => {
+app.get('/tasks', async (request, response) => {
+    try {
+        const tasks = await Task.find({})
         response.send(tasks)
-    }).catch((error) => {
+    } catch(error) {
         response.status(500).send()
-    })
+    }
 })
 
-app.get('/tasks/:id', (request, response) => {
+app.get('/tasks/:id', async (request, response) => {
     const _id = request.params.id
 
-    Task.findById(_id).then((task) => {
+    try {
+        const task = await Task.findById(_id)
         if(!task) {
             return response.status(404).send()
         }
         response.send(task)
-
-    })
+    } catch(error) {
+        response.status(500).send()        
+    }
 })
 
 app.listen(port, () => {
