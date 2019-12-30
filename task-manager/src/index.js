@@ -14,6 +14,8 @@ const port = process.env.PORT || 3000
 */
 app.use(express.json())
 
+
+// ====== USERS ======
 app.post('/users', async (request, response) => {
     const user = new User(request.body)
 
@@ -76,6 +78,23 @@ app.patch('/users/:id', async(request, response) => {
 
 })
 
+app.delete('/users/:id', async(request, response) => {
+    const _id = request.params.id
+
+    try {
+        const user = await User.findByIdAndDelete(_id)
+        if(!user) {
+            response.status(404).send()
+        }
+        response.send(user)
+    } catch(error) {
+        response.status(500).send()
+    }
+
+})
+
+
+// ====== TASKS ======
 app.post('/tasks', async (request, response) => {
     const task = new Task(request.body)
 
@@ -110,15 +129,6 @@ app.get('/tasks/:id', async (request, response) => {
     }
 })
 
-// Goal: Allow for task updates
-// 1. Setup the route handler
-// 2. Send error if unknown updates
-// 3. Attempt to update the task
-//      - Handle task not found
-//      - Handle validation errors
-//      - Handle success
-// 4. Test your work
-
 app.patch('/tasks/:id', async (request, response) => {
     const _id = request.params.id
 
@@ -133,13 +143,35 @@ app.patch('/tasks/:id', async (request, response) => {
 
     try {
         const task = await Task.findByIdAndUpdate(_id, request.body, { new: true, runValidators: true})
-        
+
         if(!task) {
             return response.status(404).send()
         }
         response.send(task)
     } catch(error) {
         response.status(400).send()
+    }
+})
+
+// Goal: Allow for removal of tasks
+// 1. Setup the endpoint handler
+// 2. Attempt to delete the task by id
+//      - Handle success
+//      - Handle task not found
+//      - Handle error
+// 3. Test
+
+app.delete('/tasks/:id', async (request, response) => {
+    const _id = request.params.id
+
+    try {
+        const task = await Task.findByIdAndDelete(_id)
+        if(!task) {
+            return response.status(404).send()
+        }
+        response.send(task)
+    } catch (error) {
+        response.status(500).send()
     }
 })
 
