@@ -50,10 +50,31 @@ app.get('/users/:id', async (request, response) => {
     }
 })
 
-// Goal: Refactor task routes to use async/await
-// 1. Refactor task routes to use async/await
-// 2. Test all routes in Postman
+app.patch('/users/:id', async(request, response) => {
+    const _id = request.params.id
 
+    //converts the request body object into an array of properties
+    const updates = Object.keys(request.body)
+    const allowedUpdates = ['name', 'email', 'password', 'age']
+
+    // check if every update in updates is included in allowedUpdates
+    const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
+
+    if(!isValidOperation) {
+        return response.status(400).send({ error: 'Invalid updates!' })
+    }
+
+    try {
+        const user = await User.findByIdAndUpdate(_id, request.body, { new: true, runValidators: true })
+        if(!user) {
+            return response.status(404).send()
+        }
+        response.send(user)
+    } catch(error) {
+        response.status(400).send()
+    }
+
+})
 
 app.post('/tasks', async (request, response) => {
     const task = new Task(request.body)
@@ -86,6 +107,39 @@ app.get('/tasks/:id', async (request, response) => {
         response.send(task)
     } catch(error) {
         response.status(500).send()        
+    }
+})
+
+// Goal: Allow for task updates
+// 1. Setup the route handler
+// 2. Send error if unknown updates
+// 3. Attempt to update the task
+//      - Handle task not found
+//      - Handle validation errors
+//      - Handle success
+// 4. Test your work
+
+app.patch('/tasks/:id', async (request, response) => {
+    const _id = request.params.id
+
+    const updates = Object.keys(request.body)
+    const allowedUpdates = ['description', 'completed']
+
+    const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
+
+    if(!isValidOperation) {
+        return response.status(400).send({ error: 'Invalid update!' })
+    }
+
+    try {
+        const task = await Task.findByIdAndUpdate(_id, request.body, { new: true, runValidators: true})
+        
+        if(!task) {
+            return response.status(404).send()
+        }
+        response.send(task)
+    } catch(error) {
+        response.status(400).send()
     }
 })
 
