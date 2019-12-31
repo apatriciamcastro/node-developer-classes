@@ -1,10 +1,14 @@
 const express = require('express')
 const Task = require('../models/task')
+const auth = require('../middleware/auth')
 
 const router = new express.Router()
 
-router.post('/tasks', async (request, response) => {
-    const task = new Task(request.body)
+router.post('/tasks', auth, async (request, response) => {
+     const task = new Task({
+        ...request.body,
+        owner: request.user._id
+    })
 
     try {
         await task.save()
@@ -14,20 +18,26 @@ router.post('/tasks', async (request, response) => {
     }
 })
 
-router.get('/tasks', async (request, response) => {
+// Goal: Refactor GET /tasks
+// 1. Add authentication
+// 2. Return tasks only for the authenticated user
+// 3. Test your work
+
+router.get('/tasks', auth, async (request, response) => {
     try {
-        const tasks = await Task.find({})
-        response.send(tasks)
+        // const tasks = await Task.find({ owner: request.user._id })
+        await request.user.populate('tasks').execPopulate()
+        response.send(request.user.tasks)
     } catch(error) {
         response.status(500).send()
     }
 })
 
-router.get('/tasks/:id', async (request, response) => {
+router.get('/tasks/:id', auth, async (request, response) => {
     const _id = request.params.id
 
     try {
-        const task = await Task.findById(_id)
+        const task = await Task.findOne({ _id, owner: request.user._id })
         if(!task) {
             return response.status(404).send()
         }
@@ -37,13 +47,7 @@ router.get('/tasks/:id', async (request, response) => {
     }
 })
 
-// Goal: Change how tasks are updated
-// 1. Find the task
-// 2. Alter the task properties
-// 3. Save the task
-// 4. Test by updating a task from Postman
-
-router.patch('/tasks/:id', async (request, response) => {
+router.patch('/tasks/:id', auth, async (request, response) => {
     const _id = request.params.id
 
     const updates = Object.keys(request.body)
@@ -56,25 +60,32 @@ router.patch('/tasks/:id', async (request, response) => {
     }
 
     try {
-        const task = await Task.findById(_id)
+        const task = await Task.findOne({ _id, owner: request.user._id })
 
-        updates.forEach((update) => task[update] = request.body[update])
-        await task.save()
-
+        
         if(!task) {
             return response.status(404).send()
         }
+        updates.forEach((update) => task[update] = request.body[update])
+        await task.save()
+
         response.send(task)
     } catch(error) {
         response.status(400).send()
     }
 })
 
-router.delete('/tasks/:id', async (request, response) => {
+// Goal: Refactor DELETE /tasks/:id
+// 1. Add authentication
+// 2. Find the task by _id/owner (findOneAndDelete)
+// 3. Test
+
+router.delete('/tasks/:id', auth, async (request, response) => {
     const _id = request.params.id
 
     try {
-        const task = await Task.findByIdAndDelete(_id)
+        const task = await Task.findOneAndDelete({ _id, owner: request.user._id })
+
         if(!task) {
             return response.status(404).send()
         }
