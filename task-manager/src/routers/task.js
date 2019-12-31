@@ -18,11 +18,6 @@ router.post('/tasks', auth, async (request, response) => {
     }
 })
 
-// Goal: Refactor GET /tasks
-// 1. Add authentication
-// 2. Return tasks only for the authenticated user
-// 3. Test your work
-
 router.get('/tasks', auth, async (request, response) => {
     try {
         // const tasks = await Task.find({ owner: request.user._id })
@@ -74,11 +69,6 @@ router.patch('/tasks/:id', auth, async (request, response) => {
         response.status(400).send()
     }
 })
-
-// Goal: Refactor DELETE /tasks/:id
-// 1. Add authentication
-// 2. Find the task by _id/owner (findOneAndDelete)
-// 3. Test
 
 router.delete('/tasks/:id', auth, async (request, response) => {
     const _id = request.params.id
