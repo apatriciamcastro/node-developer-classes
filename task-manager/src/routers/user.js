@@ -3,12 +3,18 @@ const User = require('../models/user')
 
 const router = new express.Router()
 
+// Goal: Have signup send back auth token
+// 1. Generate a token for the saved user
+// 2. Send back both the token and the user
+// 3. Create a new user from Postman and confirm the token is there
+
 router.post('/users', async (request, response) => {
     const user = new User(request.body)
 
     try {
         await user.save()
-        response.status(201).send(user)
+        const token = await user.generateAuthToken()
+        response.status(201).send({ user, token })
     } catch (error) {
         response.status(400).send(error)
 
@@ -18,7 +24,8 @@ router.post('/users', async (request, response) => {
 router.post('/users/login', async (request, response) => {
     try{
         const user = await User.findByCredentials(request.body.email, request.body.password)
-        response.send(user)
+        const token = await user.generateAuthToken()
+        response.send({ user, token })
     } catch(error) {
         response.status(400).send()
     }
