@@ -1,12 +1,8 @@
 const express = require('express')
 const User = require('../models/user')
+const auth = require('../middleware/auth')
 
 const router = new express.Router()
-
-// Goal: Have signup send back auth token
-// 1. Generate a token for the saved user
-// 2. Send back both the token and the user
-// 3. Create a new user from Postman and confirm the token is there
 
 router.post('/users', async (request, response) => {
     const user = new User(request.body)
@@ -32,13 +28,41 @@ router.post('/users/login', async (request, response) => {
 
 })
 
-router.get('/users', async (request, response) => {
-   try {
-       const users = await User.find({})
-       response.send(users)
+router.post('/users/logout', auth, async (request, response) => {
+    try {
+        request.user.tokens = request.user.tokens.filter((token) => {
+            return token.token !== request.token
+        })
+        await request.user.save()
+
+        response.send()
     } catch(error) {
         response.status(500).send()
-    }  
+    }
+})
+
+// Goal: Create a way to logout of all sessions
+// 1. Setup POST /users/logoutAll
+// 2. Create the router handler to wipe the tokens array
+//      - send 200 or 500
+// 3. Test your work
+//      - Login a few times and logout of all. Check database
+
+router.post('/users/logoutAll', auth, async (request, response) => {
+    try {
+        request.user.tokens = []
+        await request.user.save()
+        response.send()
+
+    } catch(error) {
+        response.status(500).send()
+    }
+})
+
+
+
+router.get('/users/me', auth, async (request, response) => {
+    response.send(request.user)
 })
 
 router.get('/users/:id', async (request, response) => {
