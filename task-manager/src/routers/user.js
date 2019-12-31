@@ -41,13 +41,6 @@ router.post('/users/logout', auth, async (request, response) => {
     }
 })
 
-// Goal: Create a way to logout of all sessions
-// 1. Setup POST /users/logoutAll
-// 2. Create the router handler to wipe the tokens array
-//      - send 200 or 500
-// 3. Test your work
-//      - Login a few times and logout of all. Check database
-
 router.post('/users/logoutAll', auth, async (request, response) => {
     try {
         request.user.tokens = []
@@ -59,30 +52,17 @@ router.post('/users/logoutAll', auth, async (request, response) => {
     }
 })
 
-
-
 router.get('/users/me', auth, async (request, response) => {
     response.send(request.user)
 })
 
-router.get('/users/:id', async (request, response) => {
-    const _id = request.params.id    
+// Goal: Refactor the update profile route
+// 1. Update the URL to /users/me
+// 2. Add the authentication middleware into the mix
+// 3. Use the existing user document instead of fetching via param id
+// 4. Test in Postman
 
-    try {
-        const user = await User.findById(_id)
-
-        if(!user){
-          return response.status(404).send()
-        }
-        response.send(user)
-    } catch(error) {
-        response.status(500).send()
-    }
-})
-
-router.patch('/users/:id', async(request, response) => {
-    const _id = request.params.id
-
+router.patch('/users/me', auth, async(request, response) => {
     const updates = Object.keys(request.body)
     const allowedUpdates = ['name', 'email', 'password', 'age']
 
@@ -93,34 +73,24 @@ router.patch('/users/:id', async(request, response) => {
     }
 
     try {
-        const user = await User.findById(_id)
-        
-        updates.forEach((update) => user[update] = request.body[update])
-        await user.save()
-        
-        if(!user) {
-            return response.status(404).send()
-        }
-        response.send(user)
+        updates.forEach((update) => request.user[update] = request.body[update])
+        await request.user.save()
+        response.send(request.user)
     } catch(error) {
         response.status(400).send()
     }
 
 })
 
-router.delete('/users/:id', async(request, response) => {
-    const _id = request.params.id
+router.delete('/users/me', auth, async (request, response) => {
+    const _id = request.user._id
 
     try {
-        const user = await User.findByIdAndDelete(_id)
-        if(!user) {
-            response.status(404).send()
-        }
-        response.send(user)
+        await request.user.remove()
+        response.send(request.user)
     } catch(error) {
         response.status(500).send()
     }
-
 })
 
 module.exports = router
