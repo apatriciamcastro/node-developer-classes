@@ -1,4 +1,5 @@
 const express = require('express')
+const multer = require('multer')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
 
@@ -85,6 +86,21 @@ router.delete('/users/me', auth, async (request, response) => {
     } catch(error) {
         response.status(500).send()
     }
+})
+
+// Goal: Setup endpoint for avatar upload
+// 1. Add POST /users/me/avatar to user router
+// 2. Setup multer to store uploads in an avatars directory
+// 3. Choose name "avatar" for the key when registering the middleware
+// 4. Send back a 200 response from route handler
+// 5. Test by creating a new Task App request and upload image
+
+const upload = multer({
+    dest: 'avatars'
+})
+
+router.post('/users/me/avatar', upload.single('avatar'), (request, response) => {
+    response.send()
 })
 
 module.exports = router
