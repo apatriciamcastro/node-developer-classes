@@ -18,7 +18,12 @@ router.post('/tasks', auth, async (request, response) => {
     }
 })
 
-
+// Goal: Setup support for skip
+// 1. Setup "skip" option
+//      - Parse query value to integer
+// 2. Fire off some requests to test it's working
+//      - Fetch the 1st page of 2 and then the 3rd page of 2
+//      - Fetch the 1st page of 3 and then the 2nd page of 3
 
 router.get('/tasks', auth, async (request, response) => {
     const match = {}
@@ -30,7 +35,11 @@ router.get('/tasks', auth, async (request, response) => {
     try {
         await request.user.populate({
             path: 'tasks',
-            match
+            match,
+            options: {
+                limit: parseInt(request.query.limit),
+                skip: parseInt(request.query.skip)
+            }
         }).execPopulate()
         response.send(request.user.tasks)
     } catch(error) {
