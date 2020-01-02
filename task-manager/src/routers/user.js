@@ -78,8 +78,6 @@ router.patch('/users/me', auth, async(request, response) => {
 })
 
 router.delete('/users/me', auth, async (request, response) => {
-    const _id = request.user._id
-
     try {
         await request.user.remove()
         response.send(request.user)
@@ -89,7 +87,6 @@ router.delete('/users/me', auth, async (request, response) => {
 })
 
 const upload = multer({
-    dest: 'avatars',
     limits: {
         fileSize: 1000000
     },
@@ -101,15 +98,24 @@ const upload = multer({
     }
 })
 
-// Goal: Clean up error handling
-// 1. Setup an error handler function
-// 2. Send back a 400 with the error message
-// 3. Test your work
-
-router.post('/users/me/avatar', upload.single('avatar'), (request, response) => {
+router.post('/users/me/avatar', auth, upload.single('avatar'), async (request, response) => {
+    request.user.avatar = request.file.buffer
+    await request.user.save()
     response.send()
 }, (error, request, response, next) => {
     response.status(400).send({ error: error.message })
+})
+
+// Goal: Setup route to delete avatar
+// 1. Setup DELETE /users/me/avatar
+// 2. Add authentication
+// 3. Set the field to undefined and save the user sending back a 200
+// 4. Test by creating a new request for Task App in Postman
+
+router.delete('/users/me/avatar', auth, async (request, response) => {    
+    request.user.avatar = undefined
+    await request.user.save()
+    response.send()
 })
 
 module.exports = router
