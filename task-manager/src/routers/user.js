@@ -1,5 +1,6 @@
 const express = require('express')
 const multer = require('multer')
+const sharp = require('sharp')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
 
@@ -99,23 +100,33 @@ const upload = multer({
 })
 
 router.post('/users/me/avatar', auth, upload.single('avatar'), async (request, response) => {
-    request.user.avatar = request.file.buffer
+    const buffer = await sharp(request.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
+    request.user.avatar = buffer
     await request.user.save()
     response.send()
 }, (error, request, response, next) => {
     response.status(400).send({ error: error.message })
 })
 
-// Goal: Setup route to delete avatar
-// 1. Setup DELETE /users/me/avatar
-// 2. Add authentication
-// 3. Set the field to undefined and save the user sending back a 200
-// 4. Test by creating a new request for Task App in Postman
-
 router.delete('/users/me/avatar', auth, async (request, response) => {    
     request.user.avatar = undefined
     await request.user.save()
     response.send()
+})
+
+router.get('/users/:id/avatar', async (request, response) => {
+    try {
+        const user = await User.findById(request.params.id)
+
+        if(!user || !user.avatar) {
+            throw new Error()
+        }
+        response.set('Content-Type', 'image/png')
+        response.send(user.avatar)
+
+    } catch (error) {
+        response.status(404).send()
+    }
 })
 
 module.exports = router
