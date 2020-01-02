@@ -88,13 +88,6 @@ router.delete('/users/me', auth, async (request, response) => {
     }
 })
 
-// Goal: Add validation to avatar upload route
-// 1. Limit the upload size to 1MB
-// 2. Only allow jpg, jpeg, png
-// 3. Test your work
-//      - Upload larger files (fail)
-//      - Upload non-images (fail)
-
 const upload = multer({
     dest: 'avatars',
     limits: {
@@ -108,8 +101,15 @@ const upload = multer({
     }
 })
 
+// Goal: Clean up error handling
+// 1. Setup an error handler function
+// 2. Send back a 400 with the error message
+// 3. Test your work
+
 router.post('/users/me/avatar', upload.single('avatar'), (request, response) => {
     response.send()
+}, (error, request, response, next) => {
+    response.status(400).send({ error: error.message })
 })
 
 module.exports = router
