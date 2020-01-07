@@ -5,6 +5,8 @@ const {
     userOneId,
     userOne,
     userTwo,
+    userTwoId,
+    taskOne,
     taskOneId,
     setupDatabase
 } = require('./fixtures/db')
@@ -25,29 +27,117 @@ test('Should create task for user', async () => {
         expect(task.completed).toBe(false)
 })
 
+test('Should not create task with invalid description/completed', async () => {
+    await request(app)
+        .post('/tasks')
+        .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+        .send({
+            completed: true
+        })
+        .expect(400)
+})
 
-// Goal: Test GET /tasks
-// 1. Request all tasks for user one
-// 2. Assert the correct status code
-// 3. Check the length of the response array is 2
-// 4. Test 
 
 test('Should get all tasks of a user', async () => {
     const response = await request(app)
-        .get('/tasks')
+    .get('/tasks')
+    .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+    .send()
+    .expect(200)
+    
+    expect(response.body.length).toEqual(2)
+})
+
+test('Should fetch only completed tasks', async () => {
+    const response = await request(app)
+    .get('/tasks?completed=true')
+    .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+    .send()
+    .expect(200)
+    
+    expect(response.body.length).toEqual(1)
+})
+
+test('Should fetch only incomplete tasks', async () => {
+    const response = await request(app)
+    .get('/tasks?completed=false')
+    .set('Authorization', `Bearer ${userTwo.tokens[0].token}`)
+    .send()
+    .expect(200)
+    
+    expect(response.body.length).toEqual(0)
+})
+
+test('Should sort tasks by description/completed/createdAt/updatedAt', async () => {
+    const response = await request(app)
+    .get('/tasks?sortBy=completed:desc')
+    .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+    .send()
+    .expect(200)
+
+    expect(response.body[0].description).toBe("Second task")
+})
+
+test('Should fetch page of tasks', async () => {
+    const response = await request(app)
+    .get('/tasks?skip=1')
+    .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+    .send()
+    .expect(200)
+
+    expect(response.body[0].description).toBe("Second task")
+})
+
+
+test('Should fetch user task by id', async () => {
+    const response = await request(app)
+    .get(`/tasks/${taskOne._id}`)
+    .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+    .send()
+    .expect(200)
+    
+    expect(response.body).not.toBeNull()
+})
+
+test('Should not fetch user task by id if unauthenticated', async () => {
+    const response = await request(app)
+    .get(`/tasks/${taskOne._id}`)
+    .send()
+    .expect(401)
+})
+
+test('Should not fetch other users task by id', async () => {
+    const response = await request(app)
+    .get(`/tasks/${taskOne._id}`)
+    .set('Authorization', `Bearer ${userTwo.tokens[0].token}`)
+    .send()
+    .expect(404)
+})
+
+test('Should not update task with invalid description/completed', async () => {
+    const response = await request(app)
+        .patch(`/tasks/${taskOne._id}`)
+        .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+        .send({
+            description: 'true'
+        })
+        .expect(200)
+
+        const task = await Task.findOne(response.body.id, response.body.owner)
+        expect(task).not.toBeNull()
+})
+
+test('Should delete user task', async () => {
+    const response = await request(app)
+        .delete(`/tasks/${taskOne._id}`)
         .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
         .send()
         .expect(200)
 
-    expect(response.body.length).toEqual(2)
+        const task = await Task.findById(taskOne._id)
+        expect(task).toBeNull()
 })
 
-// Goal: Test delete task security
-// 1. Attempt to have the second user delete the first task (should fail)
-//      - Setup necessary exports from db.js
-// 2. Assert the failed status code
-// 3. Assert the task is still in the database
-// 4. Test your work
 
 test('Should not delete task from other user', async () => {
     const response = await request(app)
@@ -58,4 +148,22 @@ test('Should not delete task from other user', async () => {
 
         const task = await Task.findOne(response.body.id, response.body.owner)
         expect(task).not.toBeNull()
+})
+
+test('Should not delete task if unauthenticated', async () => {
+    const response = await request(app)
+        .delete(`/tasks/${taskOneId}`)
+        .send()
+        .expect(401)
+
+        const task = await Task.findOne(response.body.id, response.body.owner)
+        expect(task).not.toBeNull()
+})
+
+test('Should not update other users task', async () => {
+    const response = await request(app)
+        .patch(`/tasks/${taskOneId}`)
+        .set('Authorization', `Bearer ${userTwo.tokens[0].token}`)
+        .send()
+        .expect(400)
 })

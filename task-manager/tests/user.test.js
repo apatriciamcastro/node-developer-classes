@@ -28,6 +28,16 @@ test('Should signup a new user', async() => {
     expect(user.password).not.toBe('Test97!')
 })
 
+test('Should not signup user with invalid name/email/password', async() => {
+    const response = await request(app)
+    .post('/users').send({
+        name: 'Patricia Castro',
+        email: 'apat@gmail.com',
+        password: 'password'
+    }).expect(400)
+})
+
+
 test('Should login existing user', async () => {
     const response = await request(app).post('/users/login').send({
         email: userOne.email,
@@ -71,7 +81,6 @@ test('Should delete account for user', async () => {
     expect(user).toBeNull()
 
 })
-
 test('Should not delete account for unauthenticated user', async () => {
     await request(app)
         .delete('/users/me')
@@ -91,14 +100,6 @@ test('Should upload avatar image', async () => {
     expect(user.avatar).toEqual(expect.any(Buffer))
 })
 
-// Goal: Test user updates
-// 1. Create "Should update valid user fields"
-//  - Update the name of the test user
-//  - Check the data to confirm it's changed
-// 2. Create "Should not update invalid user fields"
-//  - Update a "location" field and expect error status code
-// 3. Test
-
 test('Should update valid user fields', async () => {
     await request(app)
     .patch('/users/me')
@@ -111,6 +112,24 @@ test('Should update valid user fields', async () => {
     expect(user.name).toBe('Andrew')
 })
 
+test('Should not update user if unauthenticated', async () => {
+    await request(app)
+        .patch('/users/me')
+        .send({
+            name: 'Patricia'
+        }).expect(401)
+})
+
+test('Should not update user with invalid name/email/password', async () => {
+    await request(app)
+        .patch('/users/me')
+        .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+        .send({
+            password: 'password'
+        }).expect(400)
+})
+
+
 test('Should not update invalid user fields', async () => {
     await request(app)
         .patch('/users/me')
@@ -119,3 +138,8 @@ test('Should not update invalid user fields', async () => {
             location: 'Porto'
         }).expect(400)
 })
+
+
+
+
+
