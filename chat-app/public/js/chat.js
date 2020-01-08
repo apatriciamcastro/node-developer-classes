@@ -5,22 +5,39 @@ const $messageForm = document.querySelector('#message-form')
 const $messageFormInput = $messageForm.querySelector('input')
 const $messageFormButton = $messageForm.querySelector('button')
 const $sendLocationButton = document.querySelector('#send-location')
+const $messages = document.querySelector('#messages')
+
+// Templates
+const messageTemplate = document.querySelector('#message-template').innerHTML
+
 
 socket.on('message', (message) => {
     console.log(message)
+    const html = Mustache.render(messageTemplate, {
+        message
+    })
+    $messages.insertAdjacentHTML('beforeend', html)
+    
+})
+
+// Goal: Create a separate event for location sharing messages
+// 1. Have server emit "locationMessage" with the URL
+// 2. Have the client listen for "locationMessage" and print the URL to the console
+// 3. Test your work by sharing a location
+
+socket.on('locationMessage', (location) => {
+    console.log(location)
 })
 
 $messageForm.addEventListener('submit', (e) => {
     e.preventDefault()
 
-    // disables the form once it's been submitted
     $messageFormButton.setAttribute('disabled', 'disabled')
   
     const message = e.target.elements.message.value
 
     socket.emit('sendMessage', message, (error) => {
 
-        // re-enable Send Button, clear input and brings focus to input
         $messageFormButton.removeAttribute('disabled')
         $messageFormInput.value = ''
         $messageFormInput.focus()
@@ -32,12 +49,6 @@ $messageForm.addEventListener('submit', (e) => {
        
     })
 })
-
-// Goal: Disable the send location button while location being sent
-// 1. Set up a selector at the top of the file
-// 2. Disable the button just before getting the current position
-// 3. Enable the button in the acknowledgement callback
-// 4. Test
 
 $sendLocationButton.addEventListener('click', () => {
     if(!navigator.geolocation) {
